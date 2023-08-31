@@ -243,7 +243,7 @@ function TransList() {
                                                                              className="text-yellow-400 text-2xl inline"/>顯示所有資料
                             </button>
                             <button
-                                className=" px-4 h-8 rounded-lg  text-xl font-bold   bg-green-500/40 hover:bg-green-600 text-black hover:text-white"
+                                className=" px-4 m-2 h-8 rounded-lg  text-xl font-bold   bg-green-500/40 hover:bg-green-600 text-black hover:text-white"
                                 onClick={fetchAllReplyData}><Icon icon="uil:smile"
                                                                              className="text-yellow-400 text-2xl inline"/>一般排序
                             </button>
