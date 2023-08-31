@@ -13,9 +13,12 @@ RUN npm install
 # 複製其他來源碼到工作目錄
 COPY . .
 
-# 暴露需要的端口，假設你的應用程序運行在3000端口上
 EXPOSE 3000
+# 建構 Vite 應用程式
+RUN npx vite build
 
-# 定義預設的運行命令
+ENV NODE_ENV=production
+
+# 使用產品模式啟動伺服器
 CMD ["npm", "start"]
 
