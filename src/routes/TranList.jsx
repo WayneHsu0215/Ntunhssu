@@ -13,6 +13,9 @@ function TransList() {
     const [searchTranID, setSearchTranID] = useState('');
     const [searchedTrans, setSearchedTrans] = useState(null);
     const [genderStats, setGenderStats] = useState([]);
+    const [showSearchButton, setShowSearchButton] = useState(true);
+    const [showDisplayAllButton, setShowDisplayAllButton] = useState(true);
+
     const checkLoginStatus = async () => {
         try {
             const response = await fetch('/api/check-auth');
@@ -51,6 +54,12 @@ function TransList() {
             .catch((error) => console.error('Error fetching longest reply data:', error));
     };
 
+    const fetchAllReplyData = () => {
+        fetch('/api/reply')
+            .then((response) => response.json())
+            .then((data) => setTransData(data))
+            .catch((error) => console.error('Error fetching longest reply data:', error));
+    };
     useEffect(() => {
         fetchReplyData();
         fetchGenderData();
@@ -106,15 +115,6 @@ function TransList() {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editedTrans, setEditedTrans] = useState(null);
 
-    const openEditModal = (trans) => {
-        setEditedTrans(trans);
-        setEditModalOpen(true);
-    };
-
-    const closeEditModal = () => {
-        setEditedTrans(null);
-        setEditModalOpen(false);
-    };
 
 
 
@@ -134,8 +134,8 @@ function TransList() {
                 }
             })
             .then(data => {
-                // 如果有返回的資料，你可以在這裡使用它。
-                fetchReplyData(); // 呼叫一個函數來重新載入資料
+
+                fetchReplyData();
             })
             .catch(error => console.error('Error updating reply:', error));
     };
@@ -185,6 +185,16 @@ function TransList() {
             .catch(error => console.error('Error fetching star data:', error));
     };
 
+    const handleSearchButtonClick = () => {
+        setShowSearchButton(false);
+        setShowDisplayAllButton(true);
+    };
+
+    const handleDisplayAllButtonClick = () => {
+        setShowSearchButton(true);
+        setShowDisplayAllButton(false);
+    };
+
     return (
         <div className="container w-full mx-auto px-4 sm:px-6 lg:px-8">
             {!loggedIn ? (
@@ -232,11 +242,15 @@ function TransList() {
                                 onClick={() => setSearchedTrans(null)}><Icon icon="uil:smile"
                                                                              className="text-yellow-400 text-2xl inline"/>顯示所有資料
                             </button>
-
+                            <button
+                                className=" px-4 h-8 rounded-lg  text-xl font-bold   bg-green-500/40 hover:bg-green-600 text-black hover:text-white"
+                                onClick={fetchAllReplyData}><Icon icon="uil:smile"
+                                                                             className="text-yellow-400 text-2xl inline"/>一般排序
+                            </button>
                             <button
                                 className=" px-4 m-2 h-8 rounded-lg  text-xl font-bold    bg-green-500/40 hover:bg-green-600 text-black hover:text-white"
                                 onClick={fetchLongestReplyData}><Icon icon="noto-v1:ok-hand"
-                                                                      className="text-yellow-400 inline"/>顯示字最多的
+                                                                      className="text-yellow-400 inline"/>回復最多的開始排序
                             </button>
                             <button
                                 className=" px-4 m-2 h-8 rounded-lg  text-xl font-bold   bg-green-500/40 hover:bg-green-600 text-black hover:text-white"
@@ -300,7 +314,7 @@ function TransList() {
                                             ''
                                         )}</td>
                                         <td className="text-center  border">{trans.ID}</td>
-                                        <td className="py-2 px-4  border">{trans.Class}</td>
+                                        <td className="py-2 px-4 w-24 border">{trans.Class}</td>
                                         <td className="py-2 px-4 border">{trans.StudentID}</td>
                                         <td className="py-2 px-4 border">{trans.Name}</td>
                                         <td className="py-2 w-10 text-center border">{trans.Gender}</td>

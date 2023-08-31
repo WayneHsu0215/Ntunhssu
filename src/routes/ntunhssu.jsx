@@ -29,6 +29,14 @@ const Ntunhssu = () => {
             .then((response) => response.json())
             .then((data) => {
                 setShowAlert(true);
+                setNewReply({
+                    Class: '',
+                    StudentID: '',
+                    Name: '',
+                    Gender: '',
+                    Content: '',
+                    UP_User: '',
+                });
             })
             .catch((error) => console.error('Error adding new reply:', error));
         setTimeout(() => {

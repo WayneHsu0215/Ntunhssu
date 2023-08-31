@@ -4,6 +4,7 @@ import { AuthContext } from './AuthContext';
 const Root = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showAlert, setShowAlert] = useState(false);
     const authContext = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -26,6 +27,7 @@ const Root = () => {
                 navigate('/TranList');
             } else {
                 console.error('Login failed');
+                setShowAlert(true);
             }
         } catch (error) {
             console.error('Error during login:', error);
@@ -72,7 +74,26 @@ const Root = () => {
                     <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">Login</button>
                 </form>
             </div>
+            {showAlert && (
+                <div
+                    className="absolute bottom-4 right-4 bg-red-500 text-white p-2 rounded shadow animate-slide-in-out">
+                    登入失敗，你打錯囉!
+                </div>
+            )}
+            <style>
+                {`
+                @keyframes slide-in-out {
+                    0%, 100% { transform: translateX(120%); }
+                    10%, 90% { transform: translateX(0); }
+                }
+
+                .animate-slide-in-out {
+                    animation: slide-in-out 3s ease;
+                }
+                `}
+            </style>
         </div>
+
     );
 };
 

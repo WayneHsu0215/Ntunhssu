@@ -44,7 +44,7 @@ router.get('/reply', async (req, res) => {
     try {
         const pool = req.app.locals.pool;
 
-        const result = await pool.request().query('SELECT ID, Class, StudentID, Name,Gender, Content, CONVERT(varchar, UP_Date, 20) AS UP_Date, UP_User FROM Reply;');
+        const result = await pool.request().query('SELECT ID, Class, StudentID, Name, Gender, Content, CONVERT(varchar, UP_Date, 20) AS UP_Date, UP_User FROM Reply ORDER BY ID ASC;');
 
         console.log(result);
 
@@ -68,8 +68,7 @@ router.post('/reply', async (req, res) => {
             .input('Name', sql.NVarChar, newReply.Name)
             .input('Gender', sql.NVarChar, newReply.Gender)
             .input('Content', sql.NVarChar, newReply.Content)
-            .input('UP_Date', sql.NVarChar, newReply.UP_Date)
-            .query('INSERT INTO Reply (Class, StudentID, Name,Gender, Content, UP_Date) VALUES (@Class, @StudentID, @Name,@Gender, @Content, @UP_Date)');
+            .query('INSERT INTO Reply (Class, StudentID, Name, Gender, Content, UP_Date) VALUES (@Class, @StudentID, @Name, @Gender, @Content, GETDATE())');
 
         res.status(201).json({ message: 'Reply added successfully' });
     } catch (err) {
