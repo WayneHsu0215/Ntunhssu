@@ -19,14 +19,14 @@ app.use(session({
 }));
 
 const config = {
-    // user: process.env.DATABASE_USER,
-    // password: process.env.DATABASE_PASSWORD,
-    // server: process.env.DATABASE_SERVER,
-    // database: process.env.DATABASE_NAME,
-    user: 'sa',
-    password: 'YourStrong@Passw0rd',
-    server: 'localhost',
-    database: 'NTUNHS',
+    user: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASSWORD,
+    server: process.env.DATABASE_SERVER,
+    database: process.env.DATABASE_NAME,
+    // user: 'sa',
+    // password: 'YourStrong@Passw0rd',
+    // server: 'localhost',
+    // database: 'NTUNHS',
     options: {
         encrypt: true, // 使用 SSL
         trustServerCertificate: true // 信任自簽名憑證
