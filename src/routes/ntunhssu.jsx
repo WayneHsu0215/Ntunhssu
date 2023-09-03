@@ -152,8 +152,8 @@ const Ntunhssu = () => {
                                     id="interest" name="interest" className="w-full p-2 border rounded" required
                                 >
                                     <option value="">請選擇</option>
-                                    <option value="是">有</option>
-                                    <option value="否">沒有</option>
+                                    <option value="有">有</option>
+                                    <option value="沒有">沒有</option>
                                 </select>
                             </div>
                             <div className="mb-4">
