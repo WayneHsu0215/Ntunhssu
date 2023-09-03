@@ -5,6 +5,7 @@ import Modal from './Modal.jsx';
 import {Icon} from '@iconify/react';
 import {checkLoginStatus} from './checkLogin.jsx';
 
+
 function TransList() {
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
@@ -13,8 +14,7 @@ function TransList() {
     const [searchTranID, setSearchTranID] = useState('');
     const [searchedTrans, setSearchedTrans] = useState(null);
     const [genderStats, setGenderStats] = useState([]);
-    const [showSearchButton, setShowSearchButton] = useState(true);
-    const [showDisplayAllButton, setShowDisplayAllButton] = useState(true);
+    const [scoreStats, setScoreStats] = useState([]);
 
     const checkLoginStatus = async () => {
         try {
@@ -45,7 +45,7 @@ function TransList() {
             .then((data) => setGenderStats(data))
             .catch((error) => console.error('Error fetching gender data:', error));
     };
-    genderStats.map((item) => console.log(item.NumberOfStudents))
+
 
     const fetchLongestReplyData = () => {
         fetch('/api/len')
@@ -53,6 +53,14 @@ function TransList() {
             .then((data) => setTransData(data))
             .catch((error) => console.error('Error fetching longest reply data:', error));
     };
+
+    const fetchScoreData = () => {
+        fetch('/api/reply/score')
+            .then((response) => response.json())
+            .then((data) => setScoreStats(data))
+            .catch((error) => console.error('Error fetching score data:', error));
+    };
+
 
     const fetchAllReplyData = () => {
         fetch('/api/reply')
@@ -63,6 +71,7 @@ function TransList() {
     useEffect(() => {
         fetchReplyData();
         fetchGenderData();
+        fetchScoreData();
     }, []);
 
 
@@ -112,9 +121,6 @@ function TransList() {
     };
 
 
-    const [editModalOpen, setEditModalOpen] = useState(false);
-    const [editedTrans, setEditedTrans] = useState(null);
-
 
 
 
@@ -139,33 +145,30 @@ function TransList() {
             })
             .catch(error => console.error('Error updating reply:', error));
     };
-    const SearchupdateReply = (ID) => {
+    const SearchupdateReply = async (ID) => {
         const requestOptions = {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
         };
 
-        fetch(`/api/reply/${ID}`, requestOptions)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
+        try {
+            const updateResponse = await fetch(`/api/reply/${searchTranID}`, requestOptions);
 
-                } else {
-                    console.error('Failed to update reply');
-                    throw new Error('Failed to update reply');
-                }
-            })
-            .then(data => {
-                // 如果有返回的資料，你可以在這裡使用它。
-                fetchReplyData(); // 呼叫一個函數來重新載入資料
-            })
-            .catch(error => console.error('Error updating reply:', error));
+            if (!updateResponse.ok) {
+                console.error('Failed to update reply');
+                throw new Error('Failed to update reply');
+            }
 
-        fetch(`/api/reply/${searchTranID}`)
-            .then((response) => response.json())
-            .then((data) => setSearchedTrans(data))
-            .catch((error) => console.error('Error searching transaction:', error));
+            const searchDataResponse = await fetch(`/api/reply/${searchTranID}`);
+            const searchData = await searchDataResponse.json();
+            setSearchedTrans(searchData);
+
+            fetchReplyData(); // 確保資料已經更新後再重新載入
+        } catch (error) {
+            console.error('Error updating or searching reply:', error);
+        }
     };
+
 
 
     const searchTransaction = () => {
@@ -185,20 +188,17 @@ function TransList() {
             .catch(error => console.error('Error fetching star data:', error));
     };
 
-    const handleSearchButtonClick = () => {
-        setShowSearchButton(false);
-        setShowDisplayAllButton(true);
-    };
-
-    const handleDisplayAllButtonClick = () => {
-        setShowSearchButton(true);
-        setShowDisplayAllButton(false);
-    };
 
     return (
         <div className="container w-full mx-auto px-4 sm:px-6 lg:px-8">
             {!loggedIn ? (
-                <p className="text-center text-red-600 text-4xl">請先登入方可使用所有功能謝謝</p>
+
+                <div className="text-center text-red-600 text-4xl">
+                    <a href="/root"
+                       className=" px-4 h-8 rounded-lg m-2   text-xl font-bold  bg-green-500/40 hover:bg-green-600 text-black hover:text-white"
+                    >點我登入</a>
+                    請先登入方可使用所有功能謝謝</div>
+
             ) : (
 
                 <div className="container m-4 rounded-lg border-4 border-gray-500 bg-gray-200 mx-auto  p-4">
@@ -208,18 +208,70 @@ function TransList() {
                         </h1>
                         <div className="heard text-l font-bold flex m-2">
                             <p className="text-xl mr-4">人員統計:</p>
-                            <p className="mr-4 text"><Icon icon="icon-park-solid:boy-one"
-                                                           className="text-blue-500 inline text-xl"/>男生: {genderStats.find(item => item.Gender === '男性')?.NumberOfStudents || 0}
+                            <p className="mr-4 text">
+                                <Icon icon="icon-park-solid:boy-one" className="text-blue-500 inline text-xl" />
+                                男生: {genderStats.find(item => item.Category === 'Gender' && item.Item === '男性')?.Count || 0}
                             </p>
-                            <p className="mr-4"><Icon icon="icon-park-solid:girl-one"
-                                                      className="inline text-red-600 text-xl"/>女生: {genderStats.find(item => item.Gender === '女性')?.NumberOfStudents || 0}
+                            <p className="mr-4">
+                                <Icon icon="icon-park-solid:girl-one" className="inline text-red-600 text-xl" />
+                                女生: {genderStats.find(item => item.Category === 'Gender' && item.Item === '女性')?.Count || 0}
                             </p>
-                            <p className="mr-4"><Icon icon="raphael:people"
-                                                      className="inline text-xl"/>總數: {genderStats.find(item => item.Gender === '總數')?.NumberOfStudents || 0}
+                            <p className="mr-4">
+                                <Icon icon="raphael:people" className="inline text-xl" />
+                                總數: {genderStats.find(item => item.Category === 'Total' && item.Item === '總數')?.Count || 0}
+                            </p>
+
+                        </div>
+                        <div className="heard text-l font-bold flex m-2">
+                            <p className="text-xl mr-4">是否為新生統計:</p>
+
+                            <p className="mr-4">
+                                <Icon icon="el:ok" className="inline text-green-600 text-xl" />
+                                是: {genderStats.find(item => item.Category === 'Class' && item.Item === '是')?.Count || 0}
+                            </p>
+                            <p className="mr-4">
+                                <Icon icon="dashicons:no" className="text-red-600 inline text-xl" />
+                                否: {genderStats.find(item => item.Category === 'Class' && item.Item === '否')?.Count || 0}
+                            </p>
+
+                        </div>
+                        <div className="heard text-l font-bold flex m-2">
+                            <p className="text-xl mr-4">對衣服的興趣:</p>
+
+                            <p className="mr-4">
+                                <Icon icon="el:ok" className="inline text-green-600 text-xl" />
+                                有: {genderStats.find(item => item.Category === 'Name' && item.Item === '有')?.Count || 0}
+                            </p>
+                            <p className="mr-4">
+                                <Icon icon="dashicons:no" className=" text-red-600 inline text-xl" />
+                                沒有: {genderStats.find(item => item.Category === 'Name' && item.Item === '沒有')?.Count || 0}
                             </p>
                         </div>
                     </div>
 
+                    <div className="flex justify-end m-2 ">
+                        <p className="mr-4">
+                            <Icon icon="icon-park-solid:one-key" className="text-green-600 inline text-xl" />
+                            : {scoreStats.find(item => item.Category === 'StudentID' && item.Item === '1')?.Count || 0}
+                        </p>
+                        <p className="mr-4">
+                            <Icon icon="icon-park-solid:two-key" className="text-green-600 inline text-xl" />
+                            : {scoreStats.find(item => item.Category === 'StudentID' && item.Item === '2')?.Count || 0}
+                        </p>
+                        <p className="mr-4">
+                            <Icon icon="icon-park-solid:three-key" className="text-green-600 inline text-xl" />
+                            : {scoreStats.find(item => item.Category === 'StudentID' && item.Item === '3')?.Count || 0}
+                        </p>
+                        <p className="mr-4">
+                            <Icon icon="icon-park-solid:four-key" className="text-green-600 inline text-xl" />
+                            : {scoreStats.find(item => item.Category === 'StudentID' && item.Item === '4')?.Count || 0}
+                        </p>
+                        <p className="mr-4">
+                            <Icon icon="icon-park-solid:five-key" className="text-green-600 inline text-xl" />
+                            : {scoreStats.find(item => item.Category === 'StudentID' && item.Item === '5')?.Count || 0}
+                        </p>
+
+                    </div>
 
                     <div className="flex flex-col md:flex-row justify-center items-center">
                         <div>
@@ -266,10 +318,10 @@ function TransList() {
                             <tr>
                                 <th className="text-center border">標記</th>
                                 <th className=" border ">序號</th>
-                                <th className="py-2 px-2 border">班級</th>
-                                <th className="py-2 px-2 border">學號</th>
-                                <th className="py-2 px-4 border">姓名</th>
                                 <th className=" border ">性別</th>
+                                <th className="py-2 px-2 border">新生</th>
+                                <th className="py-2 px-2 border">滿意度</th>
+                                <th className="py-2 px-4 border">衣服<br/>興趣</th>
                                 <th className="py-2 px-4 border">回覆說明</th>
                                 <th className="py-2 px-4 border">填表單時間</th>
                                 <th className="py-2 px-4 border">標記/刪除</th>
@@ -284,10 +336,10 @@ function TransList() {
                                         ''
                                     )}</td>
                                     <td className="text-center border">{searchedTrans.ID}</td>
+                                    <td className="py-2   w-10 text-center border">{searchedTrans.Gender}</td>
                                     <td className="py-2 px-4 border">{searchedTrans.Class}</td>
                                     <td className="py-2 px-4 border">{searchedTrans.StudentID}</td>
                                     <td className="py-2 px-4 border">{searchedTrans.Name}</td>
-                                    <td className="py-2   w-10 text-center border">{searchedTrans.Gender}</td>
                                     <td className="py-2 px-2 w-1/2 border">{searchedTrans.Content}</td>
                                     <td className="py-2 px-4 border">{searchedTrans.UP_Date}</td>
 
@@ -314,10 +366,11 @@ function TransList() {
                                             ''
                                         )}</td>
                                         <td className="text-center  border">{trans.ID}</td>
-                                        <td className="py-2 px-4 w-24 border">{trans.Class}</td>
+                                        <td className="py-2 w-10 text-center border">{trans.Gender}</td>
+                                        <td className="py-2 px-4  border">{trans.Class}</td>
                                         <td className="py-2 px-4 border">{trans.StudentID}</td>
                                         <td className="py-2 px-4 border">{trans.Name}</td>
-                                        <td className="py-2 w-10 text-center border">{trans.Gender}</td>
+
                                         <td className="py-2 px-2 w-1/2 border">{trans.Content}</td>
                                         <td className="py-2 px-4 border">{trans.UP_Date}</td>
                                         <td className="py-2 px-4 flex justify-center border">
